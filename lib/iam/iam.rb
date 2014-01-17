@@ -58,7 +58,9 @@ module Aws
                                                     "DBParameterGroups" =>"DBParameterGroup",
                                                     "DBSecurityGroups" =>"DBSecurityGroup",
                                                     "EC2SecurityGroups" =>"EC2SecurityGroup",
-                                                    "IPRanges" =>"IPRange"},
+                                                    "IPRanges" =>"IPRange",
+                                                    "VirtualMFADevices" =>"member",
+                                                    "Users" =>"member"},
                                      :force_array =>["DBInstances",
                                                      "DBParameterGroups",
                                                      "DBSecurityGroups",
@@ -119,6 +121,55 @@ module Aws
       on_exception
     end
 
+
+    # options:
+    #    :marker => value received from previous response if IsTruncated = true
+    #    :max_items => number of items you want returned
+    #    :path_prefix => for filtering results, default is /
+    def list_groups(options={})
+      params = {}
+      params['Marker'] = options[:marker] if options[:marker]
+      params['MaxItems'] = options[:max_items] if options[:max_items]
+      params['PathPrefix'] = options[:path_prefix] if options[:path_prefix]
+
+      resp = do_request("ListGroups", params, :pull_out_array=>[:list_groups_result, :groups])
+
+    rescue Exception
+      on_exception
+    end
+
+    # name: name of group
+    # options:
+    #    :marker => value received from previous response if IsTruncated = true
+    #    :max_items => number of items you want returned
+    def get_users_from_group(name, options={})
+      params = {}
+      params['GroupName'] = name
+
+      params['Marker'] = options[:marker] if options[:marker]
+      params['MaxItems'] = options[:max_items] if options[:max_items]
+
+      resp = do_request("GetGroup", params, :pull_out_array=>[:get_group_result, :users])
+
+    rescue Exception
+      on_exception
+    end
+
+    # options:
+    #    :marker => value received from previous response if IsTruncated = true
+    #    :max_items => number of items you want returned
+    #    :assignment_status => status of devices to list, values are Assigned, Unassigned, and Any
+    def list_virtual_mfa_devices(options={})
+      params = {}
+      params['Marker'] = options[:marker] if options[:marker]
+      params['MaxItems'] = options[:max_items] if options[:max_items]
+      params['AssignmentStatus'] = options[:assignment_status] if options[:assignment_status]
+
+      resp = do_request("ListVirtualMFADevices", params, :pull_out_array=>[:list_virtual_mfa_devices_result, :virtual_mfa_devices])
+
+    rescue Exception
+      on_exception
+    end
 
   end
 
